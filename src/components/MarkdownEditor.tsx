@@ -266,7 +266,8 @@ $$
       a.click();
       URL.revokeObjectURL(url);
       showAlert('Document saved successfully!', 'success');
-    } catch (error) {
+    } catch (err) { // Changed error to err
+      console.error('Error saving document:', err); // Log the error
       showAlert('Error saving document', 'error');
     }
   };
@@ -278,17 +279,18 @@ $$
     const file = files[0];
     const reader = new FileReader();
     
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      try {
-        const content = e.target?.result;
-        if (typeof content === 'string') {
-          setMarkdown(content);
-          showAlert('Document loaded successfully!', 'success');
-        }
-      } catch (error) {
-        showAlert('Error loading document', 'error');
-      }
-    };
+   reader.onload = (e: ProgressEvent<FileReader>) => {
+  try {
+    const content = e.target?.result;
+    if (typeof content === 'string') {
+      setMarkdown(content);
+      showAlert('Document loaded successfully!', 'success');
+    }
+  } catch (err) { // Changed error to err
+    console.error('Error loading document:', err); // Log the error
+    showAlert('Error loading document', 'error');
+  }
+};
     
     reader.readAsText(file);
   };
