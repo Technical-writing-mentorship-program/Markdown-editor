@@ -343,11 +343,11 @@ $$
           </div>
         </div>
         <div className="flex gap-2">
-          <Button 
-            variant="secondary" 
-            size="sm"
-            onClick={() => document.getElementById('file-input').click()}
-          >
+        <Button 
+  variant="secondary" 
+  size="sm"
+  onClick={() => document.getElementById('file-input')!.click()}
+>
             <Upload className="w-4 h-4 mr-2" />
             Load
           </Button>
