@@ -2,13 +2,35 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Save, Upload, Download, Youtube, BookOpen } from 'lucide-react';
+import { Save, Upload, Youtube, BookOpen } from 'lucide-react';
 import { Alert, AlertTitle } from '@/components/ui/alert';
+
+// Define more specific types to avoid 'any'
+interface MarkedRenderer {
+  text: (text: string) => string;
+  paragraph: (text: string) => string;
+}
+
+interface MarkedOptions {
+  renderer: MarkedRenderer;
+  gfm: boolean;
+  breaks: boolean;
+  tables: boolean;
+  smartLists: boolean;
+  smartypants: boolean;
+  headerIds: boolean;
+  mangle: boolean;
+}
 
 // Define types
 interface AlertType {
     message: string;
     type: 'error' | 'success' | 'info' | 'warning';
+  }
+
+  interface KatexOptions {
+    delimiters: Array<{ left: string; right: string; display: boolean }>;
+    throwOnError: boolean;
   }
 
 // Keep existing library imports
@@ -24,19 +46,19 @@ const styles = [
 ];
 
 declare global {
-    interface Window {
-      marked: {
-        parse: (text: string) => string;
-        setOptions: (options: any) => void;
-        Renderer: new () => any;
-      };
-      DOMPurify: {
-        sanitize: (html: string, options?: any) => string;
-      };
-      katex: any;
-      renderMathInElement: (element: HTMLElement, options: any) => void;
-    }
+  interface Window {
+    marked: {
+      parse: (text: string) => string;
+      setOptions: (options: MarkedOptions) => void;
+      Renderer: new () => MarkedRenderer;
+    };
+    DOMPurify: {
+      sanitize: (html: string, options?: Record<string, unknown>) => string;
+    };
+    katex: unknown;
+    renderMathInElement: (element: HTMLElement, options: KatexOptions) => void;
   }
+}
 
 scripts.forEach(src => {
   const script = document.createElement('script');
@@ -53,10 +75,11 @@ styles.forEach(href => {
 });
 
 const MarkdownEditor: React.FC = () => {
-const [markdown, setMarkdown] = useState<string>('');
-const [html, setHtml] = useState<string>('');
-const [alert, setAlert] = useState<AlertType | null>(null);
-const [librariesLoaded, setLibrariesLoaded] = useState<boolean>(false);
+  const [markdown, setMarkdown] = useState<string>('');
+  const [html, setHtml] = useState<string>('');
+  const [alert, setAlert] = useState<AlertType | null>(null);
+  const [librariesLoaded, setLibrariesLoaded] = useState<boolean>(false);
+
 
   const initialMarkdown = `# Markdown Editor Examples
 
@@ -219,9 +242,55 @@ $$
 
   // Convert markdown to HTML with math support
   useEffect(() => {
+    const checkLibraries = setInterval(() => {
+      if (window.marked && window.DOMPurify && window.katex) {
+        setLibrariesLoaded(true);
+        clearInterval(checkLibraries);
+        setMarkdown(initialMarkdown);
+      }
+    }, 100);
+
+    return () => clearInterval(checkLibraries);
+  }, [initialMarkdown]); // Added initialMarkdown to dependencies
+
+  useEffect(() => {
+    if (librariesLoaded) {
+      const renderer = new window.marked.Renderer();
+  
+      renderer.text = (text: string): string => {
+        text = text.replace(/~([^~]+)~/g, (unused: string, p1: string) => `<sub>${p1}</sub>`);
+        text = text.replace(/\^([^\^]+)\^/g, (unused: string, p1: string) => `<sup>${p1}</sup>`);
+        return text;
+      };
+  
+      let footnoteIndex = 1;
+  
+      renderer.paragraph = (text: string): string => {
+        text = text.replace(/\[\^([^\]]+)\]/g, (unused: string, id: string) => {
+          const currentIndex = footnoteIndex;
+          footnoteIndex++;
+          return `<sup class="footnote-ref"><a href="#fn${currentIndex}">${currentIndex}</a></sup>`;
+        });
+        return `<p>${text}</p>`;
+      };
+  
+      window.marked.setOptions({
+        renderer: renderer,
+        gfm: true,
+        breaks: true,
+        tables: true,
+        smartLists: true,
+        smartypants: true,
+        headerIds: true,
+        mangle: false
+      });
+    }
+  }, [librariesLoaded]);
+
+  useEffect(() => {
     if (librariesLoaded && markdown) {
       try {
-        let rawHtml = window.marked.parse(markdown);
+        const rawHtml = window.marked.parse(markdown); // Changed to const
   
         const cleanHtml = window.DOMPurify.sanitize(rawHtml, {
           ADD_TAGS: ['iframe', 'sub', 'sup'],
@@ -242,8 +311,8 @@ $$
             });
           }
         }, 0);
-      } catch (error) {
-        console.error('Error processing markdown:', error);
+      } catch (err) {
+        console.error('Error processing markdown:', err);
         setHtml('<p>Error processing markdown</p>');
       }
     }
