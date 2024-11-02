@@ -53,10 +53,10 @@ In today's fast-paced technical documentation landscape, having robust tools tha
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/markdown-editor.git
+git clone https://github.com/Technical-writing-mentorship-program/Markdown-editor.git
 
 # Navigate to project directory
-cd markdown-editor
+cd Markdown-editor
 
 # Install dependencies
 npm install
@@ -95,8 +95,6 @@ We welcome contributions from the technical writing community! Here's how you ca
 3. **Code Contributions**: Submit PRs for new features or bug fixes
 4. **Documentation**: Help improve our documentation and examples
 
-Please read our [Contributing Guidelines](CONTRIBUTING.md) for details.
-
 ## 🎯 Future Roadmap
 
 - [ ] Maths support (This is not working properly)
@@ -122,12 +120,12 @@ This project stands on the shoulders of giants in both the technical writing and
 
 We're building more than just a tool - we're building a community of technical writers who believe in better documentation tools. Join us:
 
-- [Discord Community](https://discord.gg/example)
-- [Twitter](https://twitter.com/example)
-- [Technical Writing Blog](https://example.com/blog)
+- [Discord Community](https://discord.gg/AkW3DutW)
+- [Twitter](https://x.com/TechnicalWriti6)
+- [Technical Writing Blog](https://technicalwritingmp.com/blog/)
 
 ---
 
-Built with ❤️ by the TWMP (Technical Writing Community) Lead [Wisdom Nwokocha]()
+Built with ❤️ by the TWMP (Technical Writing Community) Lead [Wisdom Nwokocha](https://www.linkedin.com/in/wisdom-nwokocha-76212a77/) and Co-Lead [Prince Onyeanuna](https://www.linkedin.com/in/prince-onyeanuna-607352246/) 
 
 *"Better tools lead to better documentation."*
