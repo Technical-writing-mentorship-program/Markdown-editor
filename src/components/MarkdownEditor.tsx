@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Save, Upload, Youtube, BookOpen } from 'lucide-react';
@@ -22,18 +22,16 @@ interface MarkedOptions {
   mangle: boolean;
 }
 
-// Define types
 interface AlertType {
-    message: string;
-    type: 'error' | 'success' | 'info' | 'warning';
-  }
+  message: string;
+  type: 'error' | 'success' | 'info' | 'warning';
+}
 
-  interface KatexOptions {
-    delimiters: Array<{ left: string; right: string; display: boolean }>;
-    throwOnError: boolean;
-  }
+interface KatexOptions {
+  delimiters: Array<{ left: string; right: string; display: boolean }>;
+  throwOnError: boolean;
+}
 
-// Keep existing library imports
 const scripts = [
   'https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js',
@@ -60,26 +58,12 @@ declare global {
   }
 }
 
-scripts.forEach(src => {
-  const script = document.createElement('script');
-  script.src = src;
-  script.async = true;
-  document.head.appendChild(script);
-});
-
-styles.forEach(href => {
-  const link = document.createElement('link');
-  link.rel = 'stylesheet';
-  link.href = href;
-  document.head.appendChild(link);
-});
-
 const MarkdownEditor: React.FC = () => {
   const [markdown, setMarkdown] = useState<string>('');
   const [html, setHtml] = useState<string>('');
   const [alert, setAlert] = useState<AlertType | null>(null);
   const [librariesLoaded, setLibrariesLoaded] = useState<boolean>(false);
-
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const initialMarkdown = `# Markdown Editor Examples
 
@@ -146,38 +130,6 @@ $$
 \\end{aligned}
 $$
 
-### Subscript & Superscript
-- Water formula: H~2~O
-- Square of x: x^2^
-- Complex: Fe^2+^ + 2OH^-^ → Fe(OH)~2~
-
-### Footnotes
-Here's a statement that needs a citation[^1].
-Here's another statement[^2].
-
-[^1]: This is the first footnote with *formatted* **text**.
-[^2]: This is the second footnote.
-
-### Chemical Equations
-$$
-\\ce{CO2 + C -> 2 CO}
-$$
-
-$$
-\\ce{Zn^2+ + 2OH- -> Zn(OH)2 v}
-$$
-
-### Mixed Examples
-1. Einstein's Field Equations:
-   $$G_{\\mu\\nu} + \\Lambda g_{\\mu\\nu} = \\frac{8\\pi G}{c^4}T_{\\mu\\nu}$$
-
-2. Chemical equilibrium with subscripts and superscripts:
-   - K~eq~ = [H~3~O^+^][OH^-^]
-
-3. Footnoted equation[^3]
-
-[^3]: $E = mc^2$ represents mass-energy equivalence.
-
 ### Task Lists
 - [x] Basic Markdown
 - [x] Math Support
@@ -188,38 +140,63 @@ $$
 > **Note**: You can combine any of these features together!
 `;
 
-  // Keep existing useEffects and functions
+  // Load scripts and styles
   useEffect(() => {
-    const checkLibraries = setInterval(() => {
-      if (window.marked && window.DOMPurify && window.katex) {
-        setLibrariesLoaded(true);
-        clearInterval(checkLibraries);
-        setMarkdown(initialMarkdown);
-      }
-    }, 100);
+    // Load scripts
+    const loadedScripts = scripts.map(src => {
+      const script = document.createElement('script');
+      script.src = src;
+      script.async = true;
+      return new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+    });
 
-    return () => clearInterval(checkLibraries);
-  }, []);
+    // Load styles
+    styles.forEach(href => {
+      if (!document.querySelector(`link[href="${href}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+      }
+    });
+
+    // Wait for all scripts to load
+    Promise.all(loadedScripts)
+      .then(() => {
+        const checkLibraries = setInterval(() => {
+          if (window.marked && window.DOMPurify && window.katex) {
+            setLibrariesLoaded(true);
+            clearInterval(checkLibraries);
+            setMarkdown(initialMarkdown);
+          }
+        }, 100);
+
+        return () => clearInterval(checkLibraries);
+      })
+      .catch(error => {
+        console.error('Error loading libraries:', error);
+      });
+  }, [initialMarkdown]);
 
   // Configure marked with custom renderer
   useEffect(() => {
     if (librariesLoaded) {
       const renderer = new window.marked.Renderer();
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-      // Support subscript and superscript
+
+      /* eslint-disable @typescript-eslint/no-unused-vars */
       renderer.text = (text: string): string => {
         text = text.replace(/~([^~]+)~/g, (_match: string, p1: string) => `<sub>${p1}</sub>`);
         text = text.replace(/\^([^\^]+)\^/g, (_match: string, p1: string) => `<sup>${p1}</sup>`);
         return text;
       };
 
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-      // Support footnotes
-      const footnotes: Record<string, number> = {};
       let footnoteIndex = 1;
-  
+
       renderer.paragraph = (text: string): string => {
-        // Handle footnote references
         text = text.replace(/\[\^([^\]]+)\]/g, (_match: string, _id: string) => {
           const currentIndex = footnoteIndex;
           footnoteIndex++;
@@ -227,7 +204,8 @@ $$
         });
         return `<p>${text}</p>`;
       };
-  
+      /* eslint-enable @typescript-eslint/no-unused-vars */
+
       window.marked.setOptions({
         renderer: renderer,
         gfm: true,
@@ -243,62 +221,17 @@ $$
 
   // Convert markdown to HTML with math support
   useEffect(() => {
-    const checkLibraries = setInterval(() => {
-      if (window.marked && window.DOMPurify && window.katex) {
-        setLibrariesLoaded(true);
-        clearInterval(checkLibraries);
-        setMarkdown(initialMarkdown);
-      }
-    }, 100);
-
-    return () => clearInterval(checkLibraries);
-  }, [initialMarkdown]); // Added initialMarkdown to dependencies
-
-  useEffect(() => {
-    if (librariesLoaded) {
-      const renderer = new window.marked.Renderer();
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-      renderer.text = (text: string): string => {
-        text = text.replace(/~([^~]+)~/g, (unused: string, p1: string) => `<sub>${p1}</sub>`);
-        text = text.replace(/\^([^\^]+)\^/g, (unused: string, p1: string) => `<sup>${p1}</sup>`);
-        return text;
-      };
-  /* eslint-disable @typescript-eslint/no-unused-vars */
-      let footnoteIndex = 1;
-      renderer.paragraph = (text: string): string => {
-        text = text.replace(/\[\^([^\]]+)\]/g, (unused: string, id: string) => {
-          const currentIndex = footnoteIndex;
-          footnoteIndex++;
-          return `<sup class="footnote-ref"><a href="#fn${currentIndex}">${currentIndex}</a></sup>`;
-        });
-        return `<p>${text}</p>`;
-      };
-  
-      window.marked.setOptions({
-        renderer: renderer,
-        gfm: true,
-        breaks: true,
-        tables: true,
-        smartLists: true,
-        smartypants: true,
-        headerIds: true,
-        mangle: false
-      });
-    }
-  }, [librariesLoaded]);
-
-  useEffect(() => {
     if (librariesLoaded && markdown) {
       try {
-        const rawHtml = window.marked.parse(markdown); // Changed to const
-  
+        const rawHtml = window.marked.parse(markdown);
+
         const cleanHtml = window.DOMPurify.sanitize(rawHtml, {
           ADD_TAGS: ['iframe', 'sub', 'sup'],
           ADD_ATTR: ['allow', 'allowfullscreen', 'frameborder', 'scrolling']
         });
-  
+
         setHtml(cleanHtml);
-  
+
         setTimeout(() => {
           const preview = document.querySelector('.preview-content') as HTMLElement;
           if (preview) {
@@ -318,7 +251,6 @@ $$
     }
   }, [markdown, librariesLoaded]);
 
-  // Keep existing alert and file handling functions
   const showAlert = (message: string, type: AlertType['type'] = 'info') => {
     setAlert({ message, type });
     setTimeout(() => setAlert(null), 3000);
@@ -361,13 +293,6 @@ $$
     reader.readAsText(file);
   };
 
-  if (!librariesLoaded) {
-    return (
-      <div className="h-screen flex items-center justify-center">
-        <p>Loading editor...</p>
-      </div>
-    );
-  }
   const handleLearnMarkdown = () => {
     window.open('https://www.youtube.com/watch?v=i-3ifG_ycjw', '_blank');
   };
@@ -411,11 +336,11 @@ $$
           </div>
         </div>
         <div className="flex gap-2">
-        <Button 
-  variant="secondary" 
-  size="sm"
-  onClick={() => document.getElementById('file-input')!.click()}
->
+          <Button 
+            variant="secondary" 
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+          >
             <Upload className="w-4 h-4 mr-2" />
             Load
           </Button>
@@ -429,7 +354,7 @@ $$
           </Button>
           <input
             type="file"
-            id="file-input"
+            ref={fileInputRef}
             className="hidden"
             accept=".md,.markdown,.txt"
             onChange={handleLoad}
@@ -467,6 +392,5 @@ $$
     </div>
   );
 };
-
 
 export default MarkdownEditor;
