@@ -1,0 +1,7 @@
+[build]
+command = "npm install && npm run build"
+output = ".next"
+
+[build.environment]
+NODE_VERSION = "18.17.1"
+NPM_VERSION = "9.6.7"
