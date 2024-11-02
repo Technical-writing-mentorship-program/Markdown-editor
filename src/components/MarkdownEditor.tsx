@@ -205,14 +205,15 @@ $$
   useEffect(() => {
     if (librariesLoaded) {
       const renderer = new window.marked.Renderer();
-  
+  /* eslint-disable @typescript-eslint/no-unused-vars */
       // Support subscript and superscript
       renderer.text = (text: string): string => {
         text = text.replace(/~([^~]+)~/g, (_match: string, p1: string) => `<sub>${p1}</sub>`);
         text = text.replace(/\^([^\^]+)\^/g, (_match: string, p1: string) => `<sup>${p1}</sup>`);
         return text;
       };
-  
+
+  /* eslint-disable @typescript-eslint/no-unused-vars */
       // Support footnotes
       const footnotes: Record<string, number> = {};
       let footnoteIndex = 1;
@@ -262,9 +263,8 @@ $$
         text = text.replace(/\^([^\^]+)\^/g, (unused: string, p1: string) => `<sup>${p1}</sup>`);
         return text;
       };
-  
-      let footnoteIndex = 1;
   /* eslint-disable @typescript-eslint/no-unused-vars */
+      let footnoteIndex = 1;
       renderer.paragraph = (text: string): string => {
         text = text.replace(/\[\^([^\]]+)\]/g, (unused: string, id: string) => {
           const currentIndex = footnoteIndex;
