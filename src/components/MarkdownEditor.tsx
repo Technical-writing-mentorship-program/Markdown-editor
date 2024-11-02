@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Save, Upload, Youtube, BookOpen } from 'lucide-react';
+import { Save, Upload, Download, Youtube, BookOpen } from 'lucide-react';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 
 // Define types
@@ -300,11 +300,11 @@ $$
     );
   }
   const handleLearnMarkdown = () => {
-    window.open('https://www.youtube.com/results?search_query=markdown+tutorial', '_blank');
+    window.open('https://www.youtube.com/watch?v=i-3ifG_ycjw', '_blank');
   };
 
   const handleDocumentation = () => {
-    window.open('https://www.markdownguide.org/', '_blank');
+    window.open('https://technicalwritingmp.com/docs/markdown-course/introduction-to-markdown/', '_blank');
   };
 
   if (!librariesLoaded) {
