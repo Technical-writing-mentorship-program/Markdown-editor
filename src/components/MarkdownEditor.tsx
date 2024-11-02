@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Save, Upload, Download, Youtube, BookOpen } from 'lucide-react';
+import { Save, Upload, Youtube, BookOpen } from 'lucide-react';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 
 // Define types
