@@ -2,7 +2,7 @@
 
 A powerful, real-time Markdown editor built with React and TypeScript, designed specifically for technical writers, documentation specialists, and content creators. This project aims to streamline the technical writing workflow by providing a modern, feature-rich editing environment.
 
-![Markdown Editor Preview](/api/placeholder/800/400)
+![Markdown Editor Preview](https://github.com/user-attachments/assets/b3ac3667-f081-41b3-9ba4-29578a12ccb8)
 
 ## 🌟 Features
 
