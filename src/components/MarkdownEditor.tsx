@@ -256,7 +256,7 @@ $$
   useEffect(() => {
     if (librariesLoaded) {
       const renderer = new window.marked.Renderer();
-  
+  /* eslint-disable @typescript-eslint/no-unused-vars */
       renderer.text = (text: string): string => {
         text = text.replace(/~([^~]+)~/g, (unused: string, p1: string) => `<sub>${p1}</sub>`);
         text = text.replace(/\^([^\^]+)\^/g, (unused: string, p1: string) => `<sup>${p1}</sup>`);
@@ -264,7 +264,7 @@ $$
       };
   
       let footnoteIndex = 1;
-  
+  /* eslint-disable @typescript-eslint/no-unused-vars */
       renderer.paragraph = (text: string): string => {
         text = text.replace(/\[\^([^\]]+)\]/g, (unused: string, id: string) => {
           const currentIndex = footnoteIndex;
