@@ -73,6 +73,7 @@ const MarkdownEditor: React.FC = () => {
 # H1 Header
 ## H2 Header
 ### H3 Header
+#### H4 Header
 
 *Italic text* and **bold text**
 ***Bold and italic text***
